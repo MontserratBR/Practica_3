@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
@@ -75,8 +76,9 @@ def buscar_cliente(request, cliente_nombre):
 #Listado de todos los clientes 
 @csrf_exempt
 def all_clientes(request):
-    clientes = list(Cliente.objects.values())
-    return JsonResponse(clientes, safe=False)
+    clientes = Cliente.objects.all()
+    return render(request, 'app_gestion_taller/all_clientes.html', {'clientes': clientes})
+
 #Listado de coches
 @csrf_exempt
 def all_coches(request):
