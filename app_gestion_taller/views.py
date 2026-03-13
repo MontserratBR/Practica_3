@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
@@ -75,8 +76,9 @@ def buscar_cliente(request, cliente_nombre):
 #Listado de todos los clientes 
 @csrf_exempt
 def all_clientes(request):
-    clientes = list(Cliente.objects.values())
-    return JsonResponse(clientes, safe=False)
+    clientes = Cliente.objects.all()
+    return render(request, 'app_gestion_taller/all_clientes.html', {'clientes': clientes})
+
 #Listado de coches
 @csrf_exempt
 def all_coches(request):
@@ -107,10 +109,30 @@ def servicios_cliente(request, cliente_nombre):
         cliente = Cliente.objects.get(nombre=cliente_nombre)
         coches = Coche.objects.filter(cliente=cliente)
         servicios = Servicio.objects.filter(coches__in=coches).distinct()
-        return JsonResponse({
-            "cliente": cliente.nombre,
-            "coches": list(coches.values('marca', 'modelo', 'matricula')),
-            "servicios": list(servicios.values('nombre', 'descripcion'))
-        })
+        contexto = {
+            'cliente': cliente,
+            'coches': coches,
+            'servicios': servicios
+        }
+        return render(request, 'app_gestion_taller/servicios_coches.html', contexto)
+
     except Cliente.DoesNotExist:
         return JsonResponse({"error": "EL cliente no fue encontrado"}, status=404)
+    
+
+def detalle_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    coches = Coche.objects.filter(cliente_id=cliente.id)
+
+    if not coches.exists():
+        mensaje = "Este cliente no tiene coches registrados."
+    else:
+        mensaje = None
+
+    contexto = {
+        'cliente': cliente,
+        'coches': coches,
+        'mensaje': mensaje
+    }
+
+    return render(request, 'app_gestion_taller/detalle_cliente.html', contexto)
