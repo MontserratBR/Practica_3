@@ -1,10 +1,15 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
+<<<<<<< HEAD
 from django.shortcuts import render
+=======
+from django.shortcuts import render, get_object_or_404, redirect
+>>>>>>> practica5
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
 from .models import Cliente, Coche, Servicio, CocheServicio
+from .forms import ClienteForm, CocheForm, ServicioForm, CocheServicioForm
 
 # Funcion para regitrar un cliente en la base de datos, recibe un JSON con los
 # datos del cliente y devuelve un mensaje de éxito o error.
@@ -65,13 +70,56 @@ def registrar_servicio(request):
     return JsonResponse({"error": "Método no permitido"}, status=405)
 
 # Búsqueda de cliente por nombre 
+##@csrf_exempt
+#def buscar_cliente(request, cliente_nombre):
+#    try:
+#        cliente = Cliente.objects.values('id','telefono', 'email').get(nombre=cliente_nombre)
+#        return JsonResponse(cliente)
+#    except Cliente.DoesNotExist:
+#        return JsonResponse({"error": "EL cliente no fue encontrado"}, status=404)
+    
+#Función para mostrar el formulario de registro de un nuevo cliente y procesar el formulario para guardar el cliente en la base de datos.
+def nuevo_cliente(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_clientes')
+    else:
+        form = ClienteForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Cliente'})
+
+#Funcion para registrar un coche a través de un formulario
+def nuevo_coche(request):
+    if request.method == 'POST':
+        form = CocheForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_coches')
+    else:
+        form = CocheForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Coche'})
+#Funcion para registrar un servicio a través de un formulario
+def nuevo_servicio(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_servicios')
+    else:
+        form = ServicioForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Servicio'})
+
+
+
+#Buscar cliente por id
 @csrf_exempt
-def buscar_cliente(request, cliente_nombre):
+def buscar_cliente(request, cliente_id):
     try:
-        cliente = Cliente.objects.values('id','telefono', 'email').get(nombre=cliente_nombre)
+        cliente = Cliente.objects.values("id", "nombre", "telefono", "email").get(id=cliente_id)
         return JsonResponse(cliente)
     except Cliente.DoesNotExist:
-        return JsonResponse({"error": "EL cliente no fue encontrado"}, status=404)
+        return JsonResponse({"error": "Cliente no encontrado"}, status=404)
 
 #Listado de todos los clientes 
 @csrf_exempt
@@ -104,15 +152,33 @@ def filtrar_coche(request, modelo):
 
 #Muestra los servicos y coches que tiene un cliente, recibe el nombre del cliente.
 @csrf_exempt
-def servicios_cliente(request, cliente_nombre):
+def servicios_cliente(request, cliente_id):
     try:
-        cliente = Cliente.objects.get(nombre=cliente_nombre)
+        cliente = Cliente.objects.get(id=cliente_id)
         coches = Coche.objects.filter(cliente=cliente)
         servicios = Servicio.objects.filter(coches__in=coches).distinct()
-        return JsonResponse({
-            "cliente": cliente.nombre,
-            "coches": list(coches.values('marca', 'modelo', 'matricula')),
-            "servicios": list(servicios.values('nombre', 'descripcion'))
-        })
+        contexto = {
+            'cliente': cliente,
+            'coches': coches,
+            'servicios': servicios
+        }
+        return render(request, 'app_gestion_taller/servicios_coches.html', contexto)
+
     except Cliente.DoesNotExist:
         return JsonResponse({"error": "EL cliente no fue encontrado"}, status=404)
+    
+
+def detalle_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    coches = Coche.objects.filter(cliente_id=cliente.id)
+    if not coches.exists():
+        mensaje = "Este cliente no tiene coches registrados."
+    else:
+        mensaje = None
+    contexto = {
+        'cliente': cliente,
+        'coches': coches,
+        'mensaje': mensaje
+    }
+
+    return render(request, 'app_gestion_taller/detalle_cliente.html', contexto)

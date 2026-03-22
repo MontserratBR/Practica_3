@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>Detalle del cliente</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4">Detalle del cliente {{ cliente.nombre }}</h1>
+        <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+        <p><strong>Email:</strong> {{ cliente.email }}</p>
+        <h2>Coche(s) del cliente</h2>
+        {% if coches %}
+            <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                <th scope="col">Matrícula</th>
+                <th scope="col">Marca</th>
+                <th scope="col">Modelo</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for coche in coches %}
+             <tr>
+                 <td>{{ coche.matricula }}</td>
+                 <td>{{ coche.marca }}</td>
+                 <td>{{ coche.modelo }}</td>
+             </tr>
+            {% endfor %}
+        </tbody>
+        {% else %}
+            <p>No hay coches registrados para este cliente.</p>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
