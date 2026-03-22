@@ -1,10 +1,7 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
-<<<<<<< HEAD
-from django.shortcuts import render
-=======
+
 from django.shortcuts import render, get_object_or_404, redirect
->>>>>>> practica5
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
